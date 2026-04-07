@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.venv/
+venv/
+.env/
+
+# Build / Distribution
+dist/
+build/
+output/
+*.spec
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Spurt runtime
+config.json
+daemon.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/
