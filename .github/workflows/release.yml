@@ -1,0 +1,87 @@
+name: Build and Release
+
+# Only runs when you push a tag like v0.1.0, v1.2.3, etc.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write  # Needed to create GitHub Releases
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Job 1: Build binaries on all 3 platforms
+  # ──────────────────────────────────────────────
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: spurt-cli.exe
+            zip_name: spurt-cli-windows.zip
+          - os: ubuntu-latest
+            artifact_name: spurt-cli
+            zip_name: spurt-cli-linux.zip
+          - os: macos-latest
+            artifact_name: spurt-cli
+            zip_name: spurt-cli-macos.zip
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Build binary with PyInstaller
+        run: pyinstaller --onefile --name spurt-cli --paths . spurt/cli/main.py
+
+      - name: Copy LICENSE and README into dist
+        run: |
+          cp LICENSE dist/
+          cp README.md dist/
+
+      - name: Zip the binary (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          cd dist
+          zip ${{ matrix.zip_name }} ${{ matrix.artifact_name }} LICENSE README.md
+
+      - name: Zip the binary (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\${{ matrix.artifact_name }},dist\LICENSE,dist\README.md -DestinationPath dist\${{ matrix.zip_name }}
+
+      - name: Upload zip as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.zip_name }}
+          path: dist/${{ matrix.zip_name }}
+
+  # ──────────────────────────────────────────────
+  # Job 2: Create GitHub Release with all binaries
+  # ──────────────────────────────────────────────
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*.zip
+          generate_release_notes: true
