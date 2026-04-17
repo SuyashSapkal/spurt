@@ -6,9 +6,24 @@ A cross-platform push-to-talk dictation tool powered by [whisper.cpp](https://gi
 
 ## Quick Start
 
-### Option 1: Download the pre-built binary (easiest)
+### Option 1: Install via Homebrew (macOS / Linux)
 
-Download the latest release for your OS from [**GitHub Releases**](https://github.com/SuyashSapkal/spurt-x/releases).
+```bash
+brew tap SuyashSapkal/spurt
+brew install spurt
+```
+
+Then start dictating:
+
+```bash
+spurt run
+```
+
+> **Note:** Linux support is experimental and currently does not work on Wayland.
+
+### Option 2: Download the pre-built binary
+
+Download the latest release for your OS from [**GitHub Releases**](https://github.com/SuyashSapkal/spurt/releases).
 
 - **Windows:** `spurt-cli-windows.zip` (contains `spurt-cli.exe`)
 - **Linux:** `spurt-cli-linux.zip` (contains `spurt-cli`)
@@ -25,7 +40,7 @@ The whisper model downloads automatically on first run. Once you see `Model load
 
 Configuration is **optional** — see the [Configuration](#configuration) section if you want to change the model, trigger key, or key mode.
 
-### Option 2: Run from source
+### Option 3: Run from source
 
 > **Note:** The Python command varies by OS. This README uses `python`. On **Windows**, you may need to use `py` instead. On some **Linux** systems, use `python3`. Replace accordingly in all commands below.
 
