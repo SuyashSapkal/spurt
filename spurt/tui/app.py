@@ -6,6 +6,9 @@ No dictation logic lives here — the same core functions the CLI uses are reuse
 
 from __future__ import annotations
 
+import contextlib
+import os
+
 from textual.app import App
 
 from spurt import __version__
@@ -96,6 +99,15 @@ class SpurtApp(App):
         text-style: bold;
         color: $secondary;
     }
+    ConfigScreen Horizontal {
+        height: auto;
+    }
+    ConfigScreen #maxtime {
+        width: 30;
+    }
+    ConfigScreen #set-max {
+        width: auto;
+    }
     """
 
     def __init__(self) -> None:
@@ -107,6 +119,34 @@ class SpurtApp(App):
         self.push_screen(DashboardScreen())
 
 
+@contextlib.contextmanager
+def _silence_stderr():
+    """Redirect the process's stderr file descriptor to null.
+
+    whisper.cpp and PortAudio log directly to the C-level stderr fd (model
+    loading, transcribe progress, audio-backend warnings). Those writes corrupt
+    the Textual screen. Textual draws via stdout / the console handle, so
+    silencing fd 2 keeps the UI clean. The fd is restored on exit, so a real
+    crash still prints its traceback.
+    """
+    try:
+        stderr_fd = 2
+        saved = os.dup(stderr_fd)
+    except OSError:
+        # No real stderr (e.g. detached process) — nothing to silence.
+        yield
+        return
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    try:
+        os.dup2(devnull, stderr_fd)
+        yield
+    finally:
+        os.dup2(saved, stderr_fd)
+        os.close(devnull)
+        os.close(saved)
+
+
 def run_tui() -> None:
     """Entry point used by the CLI when invoked with no subcommand."""
-    SpurtApp().run()
+    with _silence_stderr():
+        SpurtApp().run()

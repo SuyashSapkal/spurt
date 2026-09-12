@@ -15,7 +15,7 @@ from textual.widgets import Button, DataTable, Input, Static
 
 from spurt.core.config import Config
 from spurt.core.hotkey import KEY_MODES, serialize_key
-from spurt.core.models import MODELS, is_model_downloaded
+from spurt.core.models import MODELS, delete_model, is_model_downloaded
 
 
 class ConfigScreen(Screen):
@@ -27,17 +27,20 @@ class ConfigScreen(Screen):
         super().__init__()
         self._dashboard = dashboard  # to pause/resume during key capture
         self._changed = False
+        self._highlighted_model: str | None = None  # model row under the cursor
 
     def compose(self) -> ComposeResult:
         with Container(id="config-body"):
             yield Static("Configuration", classes="section-title")
             yield Static("Model (click a row to select):", classes="section-title")
             yield DataTable(id="models", cursor_type="row", zebra_stripes=True)
+            with Horizontal():
+                yield Button("Delete highlighted model", id="delete-model", variant="error")
             yield Static("Key mode (click a row to select):", classes="section-title")
             yield DataTable(id="modes", cursor_type="row", zebra_stripes=True)
             with Horizontal():
                 yield Input(id="maxtime", placeholder="max recording seconds")
-                yield Button("Set max time", id="set-max", variant="primary")
+                yield Button("Save", id="set-max", variant="primary")
             with Horizontal():
                 yield Button("Capture trigger key", id="capture")
                 yield Button("Reset defaults", id="reset", variant="warning")
@@ -76,6 +79,12 @@ class ConfigScreen(Screen):
         self._changed = True
 
     # -- Row selection --
+    def on_data_table_row_highlighted(
+        self, event: DataTable.RowHighlighted
+    ) -> None:
+        if event.data_table.id == "models" and event.row_key is not None:
+            self._highlighted_model = event.row_key.value
+
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
         name = event.row_key.value
         cfg = self.app.cfg
@@ -96,6 +105,8 @@ class ConfigScreen(Screen):
         bid = event.button.id
         if bid == "set-max":
             self._set_max_time()
+        elif bid == "delete-model":
+            self._delete_model()
         elif bid == "capture":
             self._capture_key()
         elif bid == "reset":
@@ -123,6 +134,21 @@ class ConfigScreen(Screen):
         self.app.cfg.save()
         self._mark_changed()
         self._status(f"Max recording time set to {value}s.")
+
+    def _delete_model(self) -> None:
+        name = self._highlighted_model
+        if name is None:
+            self._status("Highlight a model row first.")
+            return
+        if name == self.app.cfg.model:
+            self._status(f"Can't delete {name} — it's the model in use.")
+            return
+        if not is_model_downloaded(name):
+            self._status(f"{name} isn't downloaded.")
+            return
+        delete_model(name)
+        self._status(f"Deleted {name}.")
+        self._populate()
 
     # -- Trigger-key capture (worker thread; engine paused meanwhile) --
     @work(thread=True, exclusive=True)
