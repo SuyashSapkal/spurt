@@ -42,7 +42,7 @@ jobs:
         run: pip install -r requirements.txt pyinstaller
 
       - name: Build binary with PyInstaller
-        run: pyinstaller --onefile --name spurt-cli --paths . spurt/cli/main.py
+        run: pyinstaller --onefile --name spurt-cli --paths . --collect-all textual spurt/cli/main.py
 
       - name: Copy LICENSE and README into dist
         run: |

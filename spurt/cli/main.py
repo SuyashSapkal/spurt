@@ -242,7 +242,18 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command is None:
-        parser.print_help()
+        # No subcommand: launch the TUI when attached to a real terminal
+        # (e.g. double-clicking spurt-cli.exe). Fall back to help when output
+        # is piped/redirected or the TUI can't start, so scripting is unaffected.
+        if sys.stdout.isatty():
+            try:
+                from spurt.tui.app import run_tui
+            except ImportError:
+                parser.print_help()
+                sys.exit(0)
+            run_tui()
+        else:
+            parser.print_help()
         sys.exit(0)
 
     handlers = {
