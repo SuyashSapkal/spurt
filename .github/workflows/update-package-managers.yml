@@ -19,8 +19,8 @@ jobs:
       - name: Download release assets and compute SHA256
         id: sha
         run: |
-          curl -sL "https://github.com/SuyashSapkal/spurt/releases/download/${GITHUB_REF_NAME}/spurt-cli-macos.zip" -o macos.zip
-          curl -sL "https://github.com/SuyashSapkal/spurt/releases/download/${GITHUB_REF_NAME}/spurt-cli-linux.zip" -o linux.zip
+          curl -sL "https://github.com/SuyashSapkal/spurt/releases/download/${GITHUB_REF_NAME}/spurt-macos.zip" -o macos.zip
+          curl -sL "https://github.com/SuyashSapkal/spurt/releases/download/${GITHUB_REF_NAME}/spurt-linux.zip" -o linux.zip
 
           echo "macos_sha=$(sha256sum macos.zip | awk '{print $1}')" >> "$GITHUB_OUTPUT"
           echo "linux_sha=$(sha256sum linux.zip | awk '{print $1}')" >> "$GITHUB_OUTPUT"
@@ -46,17 +46,17 @@ jobs:
             license "BSD-2-Clause"
 
             on_macos do
-              url "https://github.com/SuyashSapkal/spurt/releases/download/PLACEHOLDER_TAG/spurt-cli-macos.zip"
+              url "https://github.com/SuyashSapkal/spurt/releases/download/PLACEHOLDER_TAG/spurt-macos.zip"
               sha256 "PLACEHOLDER_MACOS_SHA"
             end
 
             on_linux do
-              url "https://github.com/SuyashSapkal/spurt/releases/download/PLACEHOLDER_TAG/spurt-cli-linux.zip"
+              url "https://github.com/SuyashSapkal/spurt/releases/download/PLACEHOLDER_TAG/spurt-linux.zip"
               sha256 "PLACEHOLDER_LINUX_SHA"
             end
 
             def install
-              bin.install "spurt-cli" => "spurt"
+              bin.install "spurt"
             end
 
             test do
@@ -95,6 +95,6 @@ jobs:
         with:
           identifier: SuyashSapkal.Spurt
           version: ${{ steps.version.outputs.version }}
-          installers-regex: 'spurt-cli-windows\.zip$'
+          installers-regex: 'spurt-windows\.zip$'
           token: ${{ secrets.WINGET_TOKEN }}
           release-tag: ${{ github.ref_name }}
