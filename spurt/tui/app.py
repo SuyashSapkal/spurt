@@ -32,10 +32,20 @@ class SpurtApp(App):
         align: center top;
     }
 
+    #main_title {
+        text-style: bold;
+        color: $primary;
+        border: round $primary;
+        padding: 1;
+        background: $secondary 20%;
+        text-align: center;
+    }
+
     #panel {
         width: 100%;
         height: 1fr;
         padding: 1 2;
+        border: round $secondary;
     }
 
     #status {
@@ -64,6 +74,7 @@ class SpurtApp(App):
         padding: 0 1;
         color: $text-muted;
         margin-bottom: 1;
+        border: round $secondary
     }
 
     #log {
@@ -84,11 +95,11 @@ class SpurtApp(App):
         align: center middle;
     }
     ConfigScreen #config-body {
-        width: 90%;
-        height: 90%;
+        # width: 100%;
+        # height: 100%;
         border: round $primary;
-        padding: 1 2;
-        background: $surface;
+        padding: 0 2;
+        # background: $surface;
     }
     ConfigScreen DataTable {
         height: auto;
@@ -97,15 +108,21 @@ class SpurtApp(App):
     }
     ConfigScreen .section-title {
         text-style: bold;
-        color: $secondary;
+        color: $primary;
+        margin: 1 0;
+        border-bottom: solid $secondary;
     }
     ConfigScreen Horizontal {
         height: auto;
+        margin: 1 0;
     }
     ConfigScreen #maxtime {
-        width: 30;
+        width: 50%;
     }
     ConfigScreen #set-max {
+        width: auto;
+    }
+    ConfigScreen #capture {
         width: auto;
     }
     """

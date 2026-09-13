@@ -70,6 +70,7 @@ class DashboardScreen(Screen):
     # ── Layout ──
     def compose(self) -> ComposeResult:
         yield Header()
+        yield Static("Dashboard", id="main_title")
         with Container(id="panel"):
             yield Static("Starting…", id="status", classes="loading")
             yield ProgressBar(id="progress", total=None, show_eta=False)
@@ -218,5 +219,5 @@ class DashboardScreen(Screen):
         c = self.app.cfg
         self.query_one("#summary", Static).update(
             f"model: {c.model}    key: {c.trigger_key}    "
-            f"mode: {c.key_mode}    max: {c.max_recording_time}s"
+            f"mode: {c.key_mode}    max time: {c.max_recording_time}s"
         )

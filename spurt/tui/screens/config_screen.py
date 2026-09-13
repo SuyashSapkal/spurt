@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from textual import work
 from textual.app import ComposeResult
-from textual.containers import Container, Horizontal
+from textual.containers import VerticalScroll, Horizontal
 from textual.screen import Screen
-from textual.widgets import Button, DataTable, Input, Static
+from textual.widgets import Footer, Header, Button, DataTable, Input, Static
 
 from spurt.core.config import Config
 from spurt.core.hotkey import KEY_MODES, serialize_key
@@ -30,22 +30,32 @@ class ConfigScreen(Screen):
         self._highlighted_model: str | None = None  # model row under the cursor
 
     def compose(self) -> ComposeResult:
-        with Container(id="config-body"):
-            yield Static("Configuration", classes="section-title")
+        yield Header()
+        yield Static("Configuration", id="main_title")
+        with VerticalScroll(id="config-body"):
             yield Static("Model (click a row to select):", classes="section-title")
             yield DataTable(id="models", cursor_type="row", zebra_stripes=True)
-            with Horizontal():
-                yield Button("Delete highlighted model", id="delete-model", variant="error")
+            yield Button("Delete highlighted model", id="delete-model", variant="error")
+
             yield Static("Key mode (click a row to select):", classes="section-title")
             yield DataTable(id="modes", cursor_type="row", zebra_stripes=True)
+
+            yield Static("Max listening time (seconds):", classes="section-title")
             with Horizontal():
                 yield Input(id="maxtime", placeholder="max recording seconds")
                 yield Button("Save", id="set-max", variant="primary")
+
+            yield Static("Set listening trigger key:", classes="section-title")
             with Horizontal():
-                yield Button("Capture trigger key", id="capture")
+                yield Button("Capture trigger key", id="capture", variant="primary")
+
+            with Horizontal():
                 yield Button("Reset defaults", id="reset", variant="warning")
                 yield Button("Back", id="back", variant="success")
+                
             yield Static("", id="config-status")
+        yield Footer()
+            
 
     def on_mount(self) -> None:
         models = self.query_one("#models", DataTable)
