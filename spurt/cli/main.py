@@ -21,7 +21,7 @@ from spurt.core.engine import Engine
 def build_parser() -> argparse.ArgumentParser:
     """Construct the CLI argument parser with all subcommands and options."""
     parser = argparse.ArgumentParser(
-        prog="spurt-cli",
+        prog="spurt",
         description="Spurt — push-to-talk dictation powered by whisper.cpp.",
     )
     parser.add_argument(
@@ -243,7 +243,7 @@ def main() -> None:
 
     if args.command is None:
         # No subcommand: launch the TUI when attached to a real terminal
-        # (e.g. double-clicking spurt-cli.exe). Fall back to help when output
+        # (e.g. double-clicking spurt.exe). Fall back to help when output
         # is piped/redirected or the TUI can't start, so scripting is unaffected.
         if sys.stdout.isatty():
             try:

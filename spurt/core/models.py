@@ -60,7 +60,7 @@ def resolve_model(identifier: str) -> ModelInfo:
 
     raise ValueError(
         f"Unknown model: {identifier!r}. "
-        f"Use 'spurt-cli config --model-list' to see available models."
+        f"Use 'spurt config --model-list' to see available models."
     )
 
 

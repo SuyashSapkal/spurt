@@ -18,14 +18,14 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            artifact_name: spurt-cli.exe
-            zip_name: spurt-cli-windows.zip
+            artifact_name: spurt.exe
+            zip_name: spurt-windows.zip
           - os: ubuntu-latest
-            artifact_name: spurt-cli
-            zip_name: spurt-cli-linux.zip
+            artifact_name: spurt
+            zip_name: spurt-linux.zip
           - os: macos-latest
-            artifact_name: spurt-cli
-            zip_name: spurt-cli-macos.zip
+            artifact_name: spurt
+            zip_name: spurt-macos.zip
 
     runs-on: ${{ matrix.os }}
 
@@ -42,7 +42,7 @@ jobs:
         run: pip install -r requirements.txt pyinstaller
 
       - name: Build binary with PyInstaller
-        run: pyinstaller --onefile --name spurt-cli --paths . --collect-all textual spurt/cli/main.py
+        run: pyinstaller --onefile --name spurt --paths . --collect-all textual spurt/cli/main.py
 
       - name: Copy LICENSE and README into dist
         run: |

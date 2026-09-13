@@ -6,44 +6,29 @@ A cross-platform push-to-talk dictation tool powered by [whisper.cpp](https://gi
 
 ## Quick Start
 
-### Option 1: Install via Homebrew (macOS / Linux)
+### Option 1: Download the pre-built binary (easiest)
 
-```bash
-brew tap SuyashSapkal/spurt
-brew install spurt
-```
+Download the latest release for your OS from [**GitHub Releases**](https://github.com/SuyashSapkal/spurt-x/releases).
 
-Then start dictating:
-
-```bash
-spurt run
-```
-
-> **Note:** Linux support is experimental and currently does not work on Wayland.
-
-### Option 2: Download the pre-built binary
-
-Download the latest release for your OS from [**GitHub Releases**](https://github.com/SuyashSapkal/spurt/releases).
-
-- **Windows:** `spurt-cli-windows.zip` (contains `spurt-cli.exe`)
-- **Linux:** `spurt-cli-linux.zip` (contains `spurt-cli`)
-- **macOS:** `spurt-cli-macos.zip` (contains `spurt-cli`)
+- **Windows:** `spurt-windows.zip` (contains `spurt.exe`)
+- **Linux:** `spurt-linux.zip` (contains `spurt`)
+- **macOS:** `spurt-macos.zip` (contains `spurt`)
 
 Unzip and run — no Python required. Default configuration is already in place, no setup needed:
 
 ```bash
 # Start dictating immediately
-spurt-cli run
+spurt run
 
 # Or launch the interactive UI (or just double-click the binary)
-spurt-cli
+spurt
 ```
 
 The whisper model downloads automatically on first run. Once you see `Model loaded. Press Ctrl+C to stop.`, hold the trigger key (Right Ctrl on Windows/Linux, Right Cmd on macOS), speak, and release — your words appear in the active window.
 
 Configuration is **optional** — see the [Configuration](#configuration) section if you want to change the model, trigger key, or key mode.
 
-### Option 3: Run from source
+### Option 2: Run from source
 
 > **Note:** The Python command varies by OS. This README uses `python`. On **Windows**, you may need to use `py` instead. On some **Linux** systems, use `python3`. Replace accordingly in all commands below.
 
@@ -73,13 +58,13 @@ The whisper model downloads automatically on first run. Once you see `Model load
 
 ## Interactive UI (TUI)
 
-Running `spurt-cli` (or `python -m spurt.cli.main`) with **no subcommand** launches a terminal UI — the same thing happens when you double-click the pre-built binary.
+Running `spurt` (or `python -m spurt.cli.main`) with **no subcommand** launches a terminal UI — the same thing happens when you double-click the pre-built binary.
 
 ![Spurt dashboard — live status and pause/resume](assets/tui-dashboard.svg)
 
 ```bash
 # Launch the terminal UI
-spurt-cli
+spurt
 python -m spurt.cli.main
 ```
 
@@ -104,19 +89,19 @@ If you want a single executable that doesn't require Python:
 pip install -r requirements-dev.txt
 
 # Build
-pyinstaller --onefile --name spurt-cli --paths . --distpath output spurt/cli/main.py
+pyinstaller --onefile --name spurt --paths . --distpath output spurt/cli/main.py
 ```
 
-The binary is at `output/spurt-cli` (Linux/macOS) or `output/spurt-cli.exe` (Windows). It works the same way — defaults are ready out of the box:
+The binary is at `output/spurt` (Linux/macOS) or `output/spurt.exe` (Windows). It works the same way — defaults are ready out of the box:
 
 ```bash
 # Start dictating — no configuration needed
-output/spurt-cli run
+output/spurt run
 
 # All other commands work the same
-output/spurt-cli config --model-list
-output/spurt-cli --version
-output/spurt-cli --help
+output/spurt config --model-list
+output/spurt --version
+output/spurt --help
 ```
 
 ---
