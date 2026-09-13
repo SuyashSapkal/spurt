@@ -1,3 +1,4 @@
 pywhispercpp
 sounddevice
 pynput
+textual

@@ -201,7 +201,7 @@ def resolve_key_mode(identifier: str) -> KeyModeInfo:
 
     raise ValueError(
         f"Unknown key mode: {identifier!r}. "
-        f"Use 'spurt-cli config --key-mode-list' to see available modes."
+        f"Use 'spurt config --key-mode-list' to see available modes."
     )
 
 

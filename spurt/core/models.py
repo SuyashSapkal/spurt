@@ -60,7 +60,7 @@ def resolve_model(identifier: str) -> ModelInfo:
 
     raise ValueError(
         f"Unknown model: {identifier!r}. "
-        f"Use 'spurt-cli config --model-list' to see available models."
+        f"Use 'spurt config --model-list' to see available models."
     )
 
 
@@ -119,3 +119,67 @@ def delete_model(model_name: str) -> bool:
         path.unlink()
         return True
     return False
+
+
+# whisper.cpp GGML weights live in this Hugging Face repo. pywhispercpp pulls
+# from the same place; we download here ourselves only so a UI can show a real
+# progress bar (pywhispercpp exposes no download-progress hook).
+_HF_MODEL_URL = (
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-{name}.bin"
+)
+
+
+def download_model(model_name: str, on_progress=None, chunk_size: int = 1 << 20) -> Path:
+    """Download a Whisper model into the cache, reporting progress.
+
+    Streams ``ggml-<model_name>.bin`` into the pywhispercpp cache directory so a
+    subsequent Transcriber load finds it cached (no second download). Intended
+    for UIs that want a determinate progress bar; the CLI path still lets
+    pywhispercpp download internally.
+
+    Args:
+        model_name: The model name (e.g., "base.en").
+        on_progress: Optional callable ``(downloaded_bytes, total_bytes)``.
+                     ``total_bytes`` is 0 when the server omits Content-Length —
+                     callers should then show an indeterminate indicator.
+        chunk_size: Read/write chunk size in bytes.
+
+    Returns:
+        Path to the downloaded model file.
+
+    Raises:
+        ValueError: If the model name is unknown.
+        urllib.error.URLError / OSError: On network or filesystem failure.
+    """
+    # Validate the name against the registry before hitting the network.
+    resolve_model(model_name if isinstance(model_name, str) else str(model_name))
+
+    import urllib.request
+
+    dest = get_model_path(model_name)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_name(dest.name + ".part")
+
+    url = _HF_MODEL_URL.format(name=model_name)
+    req = urllib.request.Request(url, headers={"User-Agent": "spurt"})
+    try:
+        with urllib.request.urlopen(req) as resp:  # nosec B310 — pinned https host
+            total = int(resp.headers.get("Content-Length", 0) or 0)
+            downloaded = 0
+            if on_progress is not None:
+                on_progress(downloaded, total)
+            with open(tmp, "wb") as f:
+                while True:
+                    buf = resp.read(chunk_size)
+                    if not buf:
+                        break
+                    f.write(buf)
+                    downloaded += len(buf)
+                    if on_progress is not None:
+                        on_progress(downloaded, total)
+        # Atomic swap — never leave a half-written file at the real path.
+        tmp.replace(dest)
+    finally:
+        if tmp.exists():
+            tmp.unlink(missing_ok=True)
+    return dest
