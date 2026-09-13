@@ -34,6 +34,9 @@ Unzip and run — no Python required. Default configuration is already in place,
 ```bash
 # Start dictating immediately
 spurt-cli run
+
+# Or launch the interactive UI (or just double-click the binary)
+spurt-cli
 ```
 
 The whisper model downloads automatically on first run. Once you see `Model loaded. Press Ctrl+C to stop.`, hold the trigger key (Right Ctrl on Windows/Linux, Right Cmd on macOS), speak, and release — your words appear in the active window.
@@ -65,6 +68,30 @@ python -m spurt.cli.main run
 The whisper model downloads automatically on first run. Once you see `Model loaded. Press Ctrl+C to stop.`, hold the trigger key (Right Ctrl on Windows/Linux, Right Cmd on macOS), speak, and release — your words appear in the active window.
 
 > **Tip:** To run spurt in the background, use a separate terminal or tmux session.
+
+---
+
+## Interactive UI (TUI)
+
+Running `spurt-cli` (or `python -m spurt.cli.main`) with **no subcommand** launches a terminal UI — the same thing happens when you double-click the pre-built binary.
+
+![Spurt dashboard — live status and pause/resume](assets/tui-dashboard.svg)
+
+```bash
+# Launch the terminal UI
+spurt-cli
+python -m spurt.cli.main
+```
+
+The UI is a **control panel**, not the dictation target — it types into whatever window is focused, so keep it running and switch to the app you want to dictate into. From here you can:
+
+- See live engine status (idle / recording / transcribing / typing / paused)
+- Pause and resume listening (the model stays warm)
+- Open **Configuration** to change the model, key mode, trigger key, and max recording time, and to delete downloaded models — each change saves immediately
+
+![Spurt configuration screen](assets/tui-config.svg)
+
+When output is piped or redirected (no interactive terminal), the no-subcommand case prints help instead, so scripting is unaffected. All `run` / `config` subcommands continue to work exactly as before.
 
 ---
 
@@ -263,7 +290,7 @@ Models ending in `.en` are English-only (faster, more accurate for English). Mod
 
 ```
 spurt/
-├── requirements.txt          # Runtime dependencies (3 packages)
+├── requirements.txt          # Runtime dependencies (4 packages)
 ├── requirements-dev.txt      # Dev dependencies (testing + build)
 ├── .gitignore
 ├── README.md
@@ -278,9 +305,16 @@ spurt/
 │   │   ├── hotkey.py         # Global hotkey detection + key modes
 │   │   ├── output.py         # Type text into active window
 │   │   └── engine.py         # Orchestrator — wires all components
-│   └── cli/
+│   ├── cli/
+│   │   ├── __init__.py
+│   │   └── main.py           # argparse CLI (thin wrapper; no args → TUI)
+│   └── tui/
 │       ├── __init__.py
-│       └── main.py           # argparse CLI (thin wrapper)
+│       ├── app.py            # Textual App + inline CSS + stderr silencing
+│       └── screens/
+│           ├── __init__.py
+│           ├── dashboard.py      # Live status + pause/resume
+│           └── config_screen.py  # Model / key mode / trigger / max time / delete
 └── tests/
     ├── __init__.py
     ├── conftest.py           # Shared fixtures
@@ -295,13 +329,14 @@ spurt/
 
 ### Dependencies
 
-Only 3 external runtime packages — everything else is Python stdlib:
+Only 4 external runtime packages — everything else is Python stdlib:
 
 | Package | Purpose |
 |---------|---------|
 | `pywhispercpp` | Whisper speech-to-text engine |
 | `sounddevice` | Cross-platform microphone capture |
 | `pynput` | Global hotkey detection + keyboard typing simulation |
+| `textual` | Terminal UI (the no-subcommand control panel) |
 
 ---
 
